@@ -1,14 +1,35 @@
+var API_URL = "http://localhost:5000/get_scores/";
 
-var links = new Set();
+var urls = new Set();
+var velvetLinks = $('.velvet.container a[href*="dex.hu"]');
 
-$('.velvet.container a[href*="dex.hu"]').each(function(e) {
-    var url = decodeURIComponent(gup("url", $(this).prop("href")));
-    if(url.split("/").length > 5) {
-        links.add(url);
-    }
+velvetLinks.each(function(e) {
+  var url = decodeURIComponent(gup("url", $(this).prop("href")));
+  if(url.split("/").length > 5) {
+      urls.add(url);
+  }
 });
 
-console.log(links);
+$.ajax({
+  url: API_URL,
+  method: "POST",
+  data: JSON.stringify(Array.from(urls)),
+  dataType: "json",
+  contentType: "application/json; charset=utf-8",
+  success: function(re) {
+    velvetLinks.each(function(e) {
+        var url = decodeURIComponent(gup("url", $(this).prop("href")));
+        if(url.split("/").length > 5 && $(this).html().indexOf("<img") < 0) {
+          if(re[url] === null) {
+            value = "-";
+          } else {
+            value = parseInt(re[url] * 100) + "%";
+          }
+          $(this).append(" [" + value + "]");
+        }
+    });
+  }
+});
 
 
 /*
