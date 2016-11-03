@@ -1,4 +1,3 @@
-alert("szia");
 
 var links = new Set();
 
@@ -12,6 +11,10 @@ $('.velvet.container a[href*="dex.hu"]').each(function(e) {
 console.log(links);
 
 
+/*
+ * http://stackoverflow.com/questions/979975/how-to-get-the-value-from-the-get-parameters
+ * ¯\_(ツ)_/¯
+ */
 function gup( name, url ) {
     if (!url) url = location.href;
     name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");

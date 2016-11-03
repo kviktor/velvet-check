@@ -36,7 +36,7 @@ def generate_score_for_images(article_url, image_urls):
     for url in image_urls:
         if not Image.by_url(url):
             score = classify_image(url)
-            print(url, score)
+            logger.info("%s: %s", url, score)
             Image.create(url, score, article_url)
 
 
@@ -51,6 +51,7 @@ def extract_instagram_urls(soup, link=None):
 
 
 def get_image_urls_from_link(link):
+    logger.info("Scanning '%s' started", link)
     content = requests.get(link).content
 
     soup = bs(content, "lxml")

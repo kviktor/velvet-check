@@ -41,7 +41,6 @@ class Article(Base):
     @property
     def score(self):
         scores = [i.score for i in self.images]
-        print(scores)
         return max(scores) if scores else 0
 
     def get_score(self):
