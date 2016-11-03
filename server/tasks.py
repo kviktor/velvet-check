@@ -13,6 +13,7 @@ from models import Article, Image
 
 logger = logging.getLogger(__name__)
 
+TWITTER_RE = re.compile(".+>([a-zA-Z0-9\./]+)<.+")
 instagram_api = "https://api.instagram.com/oembed/?callback=&url=%s"
 MODEL_DEF = "/home/kviktor/Python/open_nsfw/nsfw_model/deploy.prototxt"
 PRETRAINED_MODEL = "/home/kviktor/Python/open_nsfw/nsfw_model/resnet_50_1by2_nsfw.caffemodel"
@@ -64,6 +65,22 @@ def extract_instagram_urls(soup, link=None):
         images.append(img_url)
     return images
 
+def extract_twitter_urls(soup, link=None):
+    images = set([])
+    blocks = soup.find_all("blockquote", {'class': "twitter-tweet"})
+    for b in blocks:
+        content = b.decode_contents().replace("\n", "").replace(" ", "")
+        result = TWITTER_RE.match(content)
+        pic_url = result.group(1)
+
+        body = requests.get("http://%s" % pic_url).content
+        twitter_soup = bs(body, "lxml")
+        for div in twitter_soup.find_all(
+            "div", {'class': "AdaptiveMedia-photoContainer"}):
+            images.add(div['data-image-url'])
+
+    return list(images)
+
 
 def get_image_urls_from_link(link):
     logger.info("Scanning '%s' started", link)
@@ -78,9 +95,14 @@ def get_image_urls_from_link(link):
     img_tags = a.find_all(img_and_not_szerzo)
 
     images = [i['src'] for i in img_tags]
-    for f in [extract_instagram_urls]:
-        images.extend(f(soup, link))
+    for f in [extract_instagram_urls, extract_twitter_urls, ]:
+        try:
+            images.extend(f(soup, link))
+        except:
+            logger.error("Error calling '%s' with '%s'", f, link)
 
+    logger.info("Scanning '%s' finished, found the following images: %s",
+                link, ",".join(images))
     return images
 
 
