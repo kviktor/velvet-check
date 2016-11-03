@@ -9,8 +9,8 @@ from celery import Celery
 from PIL import Image as PIL_Image
 from StringIO import StringIO
 
-from .models import Article, Image
-from .settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
+from models import Article, Image
+from settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +60,7 @@ def extract_instagram_urls(soup, link=None):
         img_url = requests.get(INSTAGRAM_API % href).json()['thumbnail_url']
         images.append(img_url)
     return images
+
 
 def extract_twitter_urls(soup, link=None):
     images = set([])
