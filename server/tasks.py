@@ -1,21 +1,36 @@
+import logging
+import re
+
 from bs4 import BeautifulSoup as bs
 from PIL import Image as PIL_Image
 from StringIO import StringIO
 import caffe
 import numpy as np
 import requests
+from celery import Celery
 
 from models import Article, Image
 
+logger = logging.getLogger(__name__)
 
 instagram_api = "https://api.instagram.com/oembed/?callback=&url=%s"
 MODEL_DEF = "/home/kviktor/Python/open_nsfw/nsfw_model/deploy.prototxt"
 PRETRAINED_MODEL = "/home/kviktor/Python/open_nsfw/nsfw_model/resnet_50_1by2_nsfw.caffemodel"
 
+BROKER_URL = "redis://username:password@hostname:port/db_number"
+BROKER_URL = "redis://localhost:6379/0"
 
-# TASK
+
+celery = Celery("app", broker=BROKER_URL)
+
+
+@celery.task(name="generate_score_for_article")
 def generate_score_for_article(url):
-    Article.create(url)
+    if Article.by_url(url):
+        logger.warning("Article '%s' is already in db", url)
+    else:
+        Article.create(url)
+
     image_urls = get_image_urls_from_link(url)
     generate_score_for_images(url, image_urls)
 
@@ -29,7 +44,7 @@ def get_article_score(url):
     if article:
         return article.score
     else:
-        generate_score_for_article(url)
+        generate_score_for_article.apply_async((url, ))
 
 
 def generate_score_for_images(article_url, image_urls):
