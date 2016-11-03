@@ -1,25 +1,21 @@
 import logging
 import re
 
-from bs4 import BeautifulSoup as bs
-from PIL import Image as PIL_Image
-from StringIO import StringIO
 import caffe
 import numpy as np
 import requests
+from bs4 import BeautifulSoup as bs
 from celery import Celery
+from PIL import Image as PIL_Image
+from StringIO import StringIO
 
-from models import Article, Image
+from .models import Article, Image
+from .settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
 
 logger = logging.getLogger(__name__)
 
 TWITTER_RE = re.compile(".+>([a-zA-Z0-9\./]+)<.+")
-instagram_api = "https://api.instagram.com/oembed/?callback=&url=%s"
-MODEL_DEF = "/home/kviktor/Python/open_nsfw/nsfw_model/deploy.prototxt"
-PRETRAINED_MODEL = "/home/kviktor/Python/open_nsfw/nsfw_model/resnet_50_1by2_nsfw.caffemodel"
-
-BROKER_URL = "redis://username:password@hostname:port/db_number"
-BROKER_URL = "redis://localhost:6379/0"
+INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 
 
 celery = Celery("app", broker=BROKER_URL)
@@ -61,7 +57,7 @@ def extract_instagram_urls(soup, link=None):
     blocks = soup.find_all("blockquote", {'class': "instagram-media"})
     for b in blocks:
         href = b.find("a")['href']
-        img_url = requests.get(instagram_api % href).json()['thumbnail_url']
+        img_url = requests.get(INSTAGRAM_API % href).json()['thumbnail_url']
         images.append(img_url)
     return images
 
@@ -177,7 +173,7 @@ def classify_image(url):
     image_data = requests.get(url).content
 
     # Pre-load caffe model.
-    nsfw_net = caffe.Net(MODEL_DEF, PRETRAINED_MODEL, caffe.TEST)
+    nsfw_net = caffe.Net(MODEL_DEF_PATH, PRETRAINED_MODEL_PATH, caffe.TEST)
 
     # Load transformer
     # Note that the parameters are hard-coded for best results

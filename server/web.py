@@ -4,7 +4,8 @@ import sha
 
 from flask import Flask, request, jsonify
 from flask_redis import FlaskRedis
-from tasks import get_article_score, BROKER_URL
+from .tasks import get_article_score
+from .settings import BROKER_URL
 
 logger = logging.getLogger(__name__)
 
