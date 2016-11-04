@@ -21,9 +21,9 @@ INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 celery = Celery("tasks")
 celery.conf.update(
     BROKER_URL=BROKER_URL,
-    ACCEPT_CONTENT=["json"],
-    TASK_SERIALIZER="json",
-    RESULT_SERIALIZER="json",
+    CELERY_ACCEPT_CONTENT=["json"],
+    CELERY_TASK_SERIALIZER="json",
+    CELERY_RESULT_SERIALIZER="json",
 )
 
 
