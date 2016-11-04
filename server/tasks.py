@@ -79,7 +79,7 @@ def extract_twitter_urls(soup, link=None):
         body = requests.get("http://%s" % pic_url).content
         twitter_soup = bs(body, "lxml")
         for div in twitter_soup.find_all(
-            "div", {'class': "AdaptiveMedia-photoContainer"}):
+                "div", {'class': "AdaptiveMedia-photoContainer"}):
             images.add(div['data-image-url'])
 
     return list(images)
@@ -97,7 +97,7 @@ def get_image_urls_from_link(link):
                 (not tag.has_attr("class") or "szerzo-kep" not in tag['class']))
     img_tags = a.find_all(img_and_not_szerzo)
 
-    images = [i['src'] for i in img_tags]
+    images = [i['src'] for i in img_tags if not i['src'].startswith("data:image")]
     for f in [extract_instagram_urls, extract_twitter_urls, ]:
         try:
             images.extend(f(soup, link))
