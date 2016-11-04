@@ -18,7 +18,13 @@ TWITTER_RE = re.compile(".+>([a-zA-Z0-9\./]+)<.+")
 INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 
 
-celery = Celery("app", broker=BROKER_URL)
+celery = Celery("tasks")
+celery.conf.update(
+    BROKER_URL=BROKER_URL,
+    ACCEPT_CONTENT=["json"],
+    TASK_SERIALIZER="json",
+    RESULT_SERIALIZER="json",
+)
 
 
 @celery.task(name="generate_score_for_article")
