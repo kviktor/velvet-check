@@ -1,0 +1,18 @@
+[Unit]
+Description=Velvet check celery worker
+After=network.target
+
+[Service]
+User=user
+Group=group
+
+WorkingDirectory=/path/to/velvet-check/server
+Environment="VENV=/path/to/.virtualenvs/velvet"
+Environment="GLOG_minloglevel=2"
+
+ExecStart=/bin/bash -c ". $VENV/bin/postactivate; . $VENV/bin/activate; exec celery -A tasks worker --loglevel=info -c 1"
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

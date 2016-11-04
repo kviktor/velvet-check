@@ -1,0 +1,17 @@
+[Unit]
+Description=Velvet check uwsgi web
+After=network.target
+
+[Service]
+User=user
+Group=group
+
+WorkingDirectory=/path/to/velvet-check/server
+Environment="VENV=/path/to/.virtualenvs/velvet"
+
+ExecStart=/bin/bash -c ". $VENV/bin/postactivate; . $VENV/bin/activate; uwsgi -s /tmp/uwsgi-velvet.sock --manage-script-name --mount /=web:app --master --chmod-socket=666 --die-on-term"
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
