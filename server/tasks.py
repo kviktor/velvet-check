@@ -109,7 +109,8 @@ def get_image_urls_from_link(link):
     return images
 
 
-# from down here it's from the open_nsfw repo
+# from down here it's from/based on the open_nsfw repo
+# https://github.com/yahoo/open_nsfw/blob/master/classify_nsfw.py
 
 def resize_image(data, sz=(256, 256)):
     """
@@ -168,7 +169,7 @@ def caffe_preprocess_and_compute(pimg, caffe_transformer=None, caffe_net=None,
 
         input_name = caffe_net.inputs[0]
         all_outputs = caffe_net.forward_all(blobs=output_layers,
-                    **{input_name: transformed_image})
+                                            **{input_name: transformed_image})
 
         outputs = all_outputs[output_layers[0]][0].astype(float)
         return outputs
@@ -184,14 +185,21 @@ def classify_image(url):
 
     # Load transformer
     # Note that the parameters are hard-coded for best results
-    caffe_transformer = caffe.io.Transformer({'data': nsfw_net.blobs['data'].data.shape})
-    caffe_transformer.set_transpose('data', (2, 0, 1))  # move image channels to outermost
-    caffe_transformer.set_mean('data', np.array([104, 117, 123]))  # subtract the dataset-mean value in each channel
-    caffe_transformer.set_raw_scale('data', 255)  # rescale from [0, 1] to [0, 255]
-    caffe_transformer.set_channel_swap('data', (2, 1, 0))  # swap channels from RGB to BGR
+    caffe_transformer = caffe.io.Transformer(
+        {'data': nsfw_net.blobs['data'].data.shape})
+    # move image channels to outermost
+    caffe_transformer.set_transpose('data', (2, 0, 1))
+    # subtract the dataset-mean value in each channel
+    caffe_transformer.set_mean('data', np.array([104, 117, 123]))
+    # rescale from [0, 1] to [0, 255]
+    caffe_transformer.set_raw_scale('data', 255)
+    # swap channels from RGB to BGR
+    caffe_transformer.set_channel_swap('data', (2, 1, 0))
 
     # Classify.
-    scores = caffe_preprocess_and_compute(image_data, caffe_transformer=caffe_transformer, caffe_net=nsfw_net, output_layers=['prob'])
+    scores = caffe_preprocess_and_compute(
+        image_data, caffe_transformer=caffe_transformer,
+        caffe_net=nsfw_net, output_layers=['prob'])
 
     # Scores is the array containing SFW / NSFW image probabilities
     # scores[1] indicates the NSFW probability

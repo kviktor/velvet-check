@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import logging
 
 from sqlalchemy import Column, String, Float, ForeignKey, DateTime, func
@@ -9,8 +10,6 @@ from sqlalchemy import create_engine
 logger = logging.getLogger(__name__)
 
 engine = create_engine("sqlite:///foo.db")
-
-from contextlib import contextmanager
 
 
 @contextmanager
@@ -48,7 +47,7 @@ class Article(Base):
 
     @classmethod
     def by_url(cls, url):
-         return cls.query.filter_by(url=url).first()
+        return cls.query.filter_by(url=url).first()
 
     @classmethod
     def create(cls, url):
@@ -68,7 +67,7 @@ class Image(Base):
 
     @classmethod
     def by_url(cls, url):
-         return cls.query.filter_by(url=url).first()
+        return cls.query.filter_by(url=url).first()
 
     @classmethod
     def create(cls, url, score, article_url):
