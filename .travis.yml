@@ -1,0 +1,11 @@
+language: python
+python:
+    - "2.7"
+
+install:
+    - pip install flake8
+    - npm install jshint
+
+script:
+    - flake8 server/ --max-line-length=85
+    - jshint clients/chrome/ --exclude="clients/chrome/js/jquery.js"
