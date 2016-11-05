@@ -41,7 +41,7 @@ sudo apt-get install redis-server sqlite3
 pip install -r requirements.txt
 ```
 
-If you use virtualenv modify the postactivate file and add these settings (if not you can just paste them before starting the web server/celery ¯\_(ツ)_/¯)
+If you use virtualenv modify the postactivate file and add these settings (if not you can just paste them before starting the web server/celery ¯\\\_(ツ)\_/¯
 ```
 export MODEL_DEF_PATH='/path/to/open_nsfw/nsfw_model/deploy.prototxt'
 export PRETRAINED_MODEL_PATH='/path/to/open_nsfw/nsfw_model/resnet_50_1by2_nsfw.caffemodel'
