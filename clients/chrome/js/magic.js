@@ -25,8 +25,10 @@ chrome.storage.local.get(key, function(result) {
       success: function(re) {
         chrome.storage.local.clear();
 
-        var value = {}; value[key] = re;
-        chrome.storage.local.set(value);
+        if(!hasNullValue(re)) {
+          var value = {}; value[key] = re;
+          chrome.storage.local.set(value);
+        }
         addScores(re);
       }
     });
@@ -45,6 +47,13 @@ function addScores(scores) {
       $(this).append(" [" + value + "]");
     }
   });
+}
+
+function hasNullValue(obj) {
+  for(var i in obj) {
+    if(obj[i] === null) return true;
+  }
+  return false;
 }
 
 
