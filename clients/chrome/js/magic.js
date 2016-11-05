@@ -6,30 +6,45 @@ var velvetLinks = $('.velvet.container a[href*="dex.hu"]');
 velvetLinks.each(function(e) {
   var url = decodeURIComponent(gup("url", $(this).prop("href")));
   if(url.split("/").length > 5) {
-      urls.add(url);
+    urls.add(url);
   }
 });
 
-$.ajax({
-  url: API_URL,
-  method: "POST",
-  data: JSON.stringify(Array.from(urls)),
-  dataType: "json",
-  contentType: "application/json; charset=utf-8",
-  success: function(re) {
-    velvetLinks.each(function(e) {
-        var url = decodeURIComponent(gup("url", $(this).prop("href")));
-        if(url.split("/").length > 5 && $(this).html().indexOf("<img") < 0) {
-          if(re[url] === null) {
-            value = "-";
-          } else {
-            value = parseInt(re[url] * 100) + "%";
-          }
-          $(this).append(" [" + value + "]");
-        }
+var key = hash(Array.from(urls).join()).toString();
+chrome.storage.local.get(key, function(result) {
+  if(key in result) {
+    addScores(result[key]);
+  } else {
+    $.ajax({
+      url: API_URL,
+      method: "POST",
+      data: JSON.stringify(Array.from(urls)),
+      dataType: "json",
+      contentType: "application/json; charset=utf-8",
+      success: function(re) {
+        chrome.storage.local.clear();
+
+        var value = {}; value[key] = re;
+        chrome.storage.local.set(value);
+        addScores(re);
+      }
     });
   }
 });
+
+function addScores(scores) {
+  velvetLinks.each(function() {
+    var url = decodeURIComponent(gup("url", $(this).prop("href")));
+    if(url.split("/").length > 5 && $(this).html().indexOf("<img") < 0) {
+      if(scores[url] === null) {
+        value = "-";
+      } else {
+        value = parseInt(scores[url] * 100) + "%";
+      }
+      $(this).append(" [" + value + "]");
+    }
+  });
+}
 
 
 /*
@@ -43,4 +58,18 @@ function gup( name, url ) {
     var regex = new RegExp( regexS );
     var results = regex.exec( url );
     return results === null ? null : results[1];
+}
+
+
+/*
+ * http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery#comment14816892_7616484
+ */
+function hash(str) {
+  var res = 0;
+  var len = str.length;
+  for (var i = 0; i < len; i++) {
+    res = res * 31 + str.charCodeAt(i);
+    res = res & res;
+  }
+  return res;
 }
