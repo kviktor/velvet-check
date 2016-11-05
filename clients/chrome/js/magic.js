@@ -1,11 +1,12 @@
 var API_URL = "http://localhost:5000/get_scores/";
+var MAX_SPLIT_NUM = 6;
 
 var urls = new Set();
 var velvetLinks = $('.velvet.container a[href*="dex.hu"]');
 
 velvetLinks.each(function(e) {
   var url = decodeURIComponent(gup("url", $(this).prop("href")));
-  if(url.split("/").length > 5) {
+  if(url.split("/").length > MAX_SPLIT_NUM) {
     urls.add(url);
   }
 });
@@ -35,7 +36,7 @@ chrome.storage.local.get(key, function(result) {
 function addScores(scores) {
   velvetLinks.each(function() {
     var url = decodeURIComponent(gup("url", $(this).prop("href")));
-    if(url.split("/").length > 5 && $(this).html().indexOf("<img") < 0) {
+    if(url.split("/").length > MAX_SPLIT_NUM && $(this).html().indexOf("<img") < 0) {
       if(scores[url] === null) {
         value = "-";
       } else {
