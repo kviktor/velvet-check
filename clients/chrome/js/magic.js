@@ -1,4 +1,4 @@
-var API_URL = "http://localhost:5000/get_scores/";
+var API_URL = "https://localhost:5000/get_scores/";
 var MAX_SPLIT_NUM = 6;
 
 var urls = new Set();

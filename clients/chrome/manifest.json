@@ -10,6 +10,6 @@
   }],
   "permissions": [
     "storage",
-    "http://localhost/"
+    "https://localhost/"
   ]
 }
