@@ -10,6 +10,7 @@ def get_env_variable(name, default=None):
         else:
             return default
 
+
 MODEL_DEF_PATH = get_env_variable("MODEL_DEF_PATH")
 PRETRAINED_MODEL_PATH = get_env_variable("PRETRAINED_MODEL_PATH")
 

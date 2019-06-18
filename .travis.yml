@@ -4,7 +4,7 @@ python:
 
 install:
     - pip install flake8
-    - npm install jshint
+    - npm -g install jshint
 
 script:
     - flake8 server/ --max-line-length=85

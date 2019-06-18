@@ -14,7 +14,7 @@ from settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
 
 logger = logging.getLogger(__name__)
 
-TWITTER_RE = re.compile(".+>([a-zA-Z0-9\./]+)<.+")
+TWITTER_RE = re.compile(".+>([a-zA-Z0-9./]+)<.+")
 INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 
 
@@ -101,8 +101,8 @@ def get_image_urls_from_link(link):
     for f in [extract_instagram_urls, extract_twitter_urls, ]:
         try:
             images.extend(f(soup, link))
-        except:
-            logger.error("Error calling '%s' with '%s'", f, link)
+        except Exception:
+            logger.exception("Error calling '%s' with '%s'", f, link)
 
     logger.info("Scanning '%s' finished, found the following images: %s",
                 link, ",".join(images))

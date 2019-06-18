@@ -23,6 +23,7 @@ def db_session():
     finally:
         session.close()
 
+
 Base = declarative_base()
 Base.query = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,

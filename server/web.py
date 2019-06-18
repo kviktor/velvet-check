@@ -21,7 +21,7 @@ def home():
 
 @app.route('/get_scores/', methods=['GET', 'POST', ])
 def get_scores():
-    article_urls = request.get_json()
+    article_urls = request.get_json() or []
     key = sha.new("".join(article_urls)).hexdigest()
     result = redis_store.get(key)
     if not result:
