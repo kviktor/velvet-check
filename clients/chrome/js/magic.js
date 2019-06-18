@@ -1,4 +1,3 @@
-var API_URL = "https://localhost:5000/get_scores/";
 var MAX_SPLIT_NUM = 6;
 
 var urls = new Set();
@@ -16,24 +15,22 @@ chrome.storage.local.get(key, function(result) {
   if(key in result) {
     addScores(result[key]);
   } else {
-    $.ajax({
-      url: API_URL,
-      method: "POST",
-      data: JSON.stringify(Array.from(urls)),
-      dataType: "json",
-      contentType: "application/json; charset=utf-8",
-      success: function(re) {
+    chrome.runtime.sendMessage(
+      {contentScriptQuery: 'get_scores', urls: Array.from(urls)},
+      function(response) {
         chrome.storage.local.clear();
 
-        if(!hasNullValue(re)) {
-          var value = {}; value[key] = re;
+        var scores = response.scores;
+        if(!hasNullValue(scores)) {
+          var value = {}; value[key] = scores;
           chrome.storage.local.set(value);
         }
-        addScores(re);
+        addScores(scores);
       }
-    });
+    );
   }
 });
+
 
 function addScores(scores) {
   velvetLinks.each(function() {
