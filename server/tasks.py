@@ -7,7 +7,6 @@ import requests
 from bs4 import BeautifulSoup as bs
 from celery import Celery
 from PIL import Image as PIL_Image
-from StringIO import StringIO
 
 from models import Article, Image
 from settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
@@ -104,12 +103,12 @@ def get_image_urls_from_link(link):
         except Exception:
             logger.exception("Error calling '%s' with '%s'", f, link)
 
-    logger.info("Scanning '%s' finished, found the following images: %s",
+    logger.info("Scanning finished (%s), found the following images: %s",
                 link, ",".join(images))
     return images
 
 
-# from down here it's from/based on the open_nsfw repo
+# from down here it's from/based on the open_nsfw repo modified for py3
 # https://github.com/yahoo/open_nsfw/blob/master/classify_nsfw.py
 
 def resize_image(data, sz=(256, 256)):
@@ -123,12 +122,11 @@ def resize_image(data, sz=(256, 256)):
     :returns bytearray:
         A byte array with the resized image
     """
-    img_data = str(data)
-    im = PIL_Image.open(StringIO(img_data))
+    im = PIL_Image.open(BytesIO(data))
     if im.mode != "RGB":
         im = im.convert('RGB')
     imr = im.resize(sz, resample=PIL_Image.BILINEAR)
-    fh_im = StringIO()
+    fh_im = BytesIO()
     imr.save(fh_im, format='JPEG')
     fh_im.seek(0)
     return bytearray(fh_im.read())
@@ -157,12 +155,12 @@ def caffe_preprocess_and_compute(pimg, caffe_transformer=None, caffe_net=None,
             output_layers = caffe_net.outputs
 
         img_data_rs = resize_image(pimg, sz=(256, 256))
-        image = caffe.io.load_image(StringIO(img_data_rs))
+        image = caffe.io.load_image(BytesIO(img_data_rs))
 
         H, W, _ = image.shape
         _, _, h, w = caffe_net.blobs['data'].data.shape
-        h_off = max((H - h) / 2, 0)
-        w_off = max((W - w) / 2, 0)
+        h_off = int(max((H - h) / 2, 0))
+        w_off = int(max((W - w) / 2, 0))
         crop = image[h_off:h_off + h, w_off:w_off + w, :]
         transformed_image = caffe_transformer.preprocess('data', crop)
         transformed_image.shape = (1, ) + transformed_image.shape

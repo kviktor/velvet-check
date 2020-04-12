@@ -1,6 +1,6 @@
+from hashlib import sha1
 import json
 import logging
-import sha
 
 from flask import Flask, request, jsonify
 from flask_redis import FlaskRedis
@@ -22,7 +22,7 @@ def home():
 @app.route('/get_scores/', methods=['GET', 'POST', ])
 def get_scores():
     article_urls = request.get_json() or []
-    key = sha.new("".join(article_urls)).hexdigest()
+    key = sha1(("".join(article_urls)).encode()).hexdigest()
     result = redis_store.get(key)
     if not result:
         logger.info("%s not found in cache", key)
