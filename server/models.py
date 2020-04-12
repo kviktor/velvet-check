@@ -56,6 +56,12 @@ class Article(Base):
             obj = cls(url=url)
             db.add(obj)
 
+    @classmethod
+    def list_paginated(cls, page):
+        # lol @ performance
+        qs = cls.query.order_by(Article.created_at.desc())[page * 5:(page + 1)* 5]
+        return qs
+
 
 class Image(Base):
     __tablename__ = "image"

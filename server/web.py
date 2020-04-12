@@ -35,6 +35,17 @@ def get_scores():
     return jsonify(**scores)
 
 
+@app.route('/list_articles/', methods=['GET'])
+def list_articles():
+    try:
+        page = int(request.args.get('page'))
+    except (ValueError, TypeError):
+        page = 0
+
+    articles = Article.list_paginated(page)
+    return render_template('list_articles.html', articles=articles, page=page)
+
+
 def all_w_dict(iterable_dict):
     for i in iterable_dict.values():
         if i is None:
