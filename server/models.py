@@ -59,7 +59,7 @@ class Article(Base):
     @classmethod
     def list_paginated(cls, page):
         # lol @ performance
-        qs = cls.query.order_by(Article.created_at.desc())[page * 5:(page + 1)* 5]
+        qs = cls.query.order_by(Article.created_at.desc())[page * 5:(page + 1) * 5]
         return qs
 
 
