@@ -19,7 +19,7 @@ TWITTER_RE = re.compile(".+>([a-zA-Z0-9./]+)<.+")
 INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 
 
-redis_broker = RedisBroker(host="localhost", port=26379)
+redis_broker = RedisBroker(url=BROKER_URL)
 dramatiq.set_broker(redis_broker)
 
 
