@@ -2,14 +2,16 @@ import logging
 import re
 
 import caffe
+import dramatiq
 import numpy as np
 import requests
 from bs4 import BeautifulSoup as bs
-from celery import Celery
+from dramatiq.brokers.redis import RedisBroker
+from io import BytesIO
 from PIL import Image as PIL_Image
 
-from models import Article, Image
-from settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
+from .models import Article, Image
+from .settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
 
 logger = logging.getLogger(__name__)
 
@@ -17,16 +19,11 @@ TWITTER_RE = re.compile(".+>([a-zA-Z0-9./]+)<.+")
 INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 
 
-celery = Celery("tasks")
-celery.conf.update(
-    BROKER_URL=BROKER_URL,
-    CELERY_ACCEPT_CONTENT=["json"],
-    CELERY_TASK_SERIALIZER="json",
-    CELERY_RESULT_SERIALIZER="json",
-)
+redis_broker = RedisBroker(host="localhost", port=26379)
+dramatiq.set_broker(redis_broker)
 
 
-@celery.task(name="generate_score_for_article")
+@dramatiq.actor
 def generate_score_for_article(url):
     if Article.by_url(url):
         logger.warning("Article '%s' is already in db", url)
@@ -46,14 +43,14 @@ def get_article_score(url):
     if article:
         return article.score
     else:
-        generate_score_for_article.apply_async((url, ))
+        generate_score_for_article.send(url)
 
 
 def generate_score_for_images(article_url, image_urls):
     for url in image_urls:
         if not Image.by_url(url):
             score = classify_image(url)
-            logger.info("%s: %s", url, score)
+            logger.info("Score for %s: %s", url, score)
             Image.create(url, score, article_url)
 
 

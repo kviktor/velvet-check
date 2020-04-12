@@ -2,21 +2,18 @@ from hashlib import sha1
 import json
 import logging
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_redis import FlaskRedis
-from tasks import get_article_score
-from settings import BROKER_URL
+
+from .models import Article
+from .settings import BROKER_URL
+from .task import get_article_score
 
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['REDIS_URL'] = BROKER_URL
 redis_store = FlaskRedis(app)
-
-
-@app.route("/")
-def home():
-    return "pls no"
 
 
 @app.route('/get_scores/', methods=['GET', 'POST', ])

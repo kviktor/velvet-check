@@ -5,3 +5,4 @@ __pycache__
 *.swo
 *.crx
 *.pem
+.env
