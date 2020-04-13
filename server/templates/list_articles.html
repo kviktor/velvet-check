@@ -1,0 +1,49 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: auto;
+        }
+
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center; margin-bottom: 10px;">
+    <a href="?page={{ page - 1 }}">Previous</a>
+        |
+    <a href="?page={{ page + 1 }}">Next</a>
+    </div>
+    <table>
+        {% for article in articles %}
+            <tr>
+                <td>
+                    <a href="{{ article.url }}">{{ article.url }}</a>
+                </td>
+                <td>
+                    {{ article.created_at }}
+                </td>
+                <td>
+                    {% for image in article.images %}
+                        <a href="{{ image.url }}">#{{ loop.index }}</a> - {{ image.score }}
+                        <br />
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

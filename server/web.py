@@ -7,7 +7,7 @@ from flask_redis import FlaskRedis
 
 from models import Article
 from settings import BROKER_URL
-from task import get_article_score
+from tasks import get_article_score
 
 logger = logging.getLogger(__name__)
 
