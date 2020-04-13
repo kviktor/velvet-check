@@ -10,8 +10,8 @@ from dramatiq.brokers.redis import RedisBroker
 from io import BytesIO
 from PIL import Image as PIL_Image
 
-from .models import Article, Image
-from .settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
+from models import Article, Image
+from settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
 
 logger = logging.getLogger(__name__)
 

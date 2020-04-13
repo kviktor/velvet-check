@@ -5,9 +5,9 @@ import logging
 from flask import Flask, request, jsonify, render_template
 from flask_redis import FlaskRedis
 
-from .models import Article
-from .settings import BROKER_URL
-from .task import get_article_score
+from models import Article
+from settings import BROKER_URL
+from task import get_article_score
 
 logger = logging.getLogger(__name__)
 
