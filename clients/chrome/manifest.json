@@ -3,7 +3,7 @@
 
   "name": "Velvet ellenőrző",
   "description": "Megnézi mennyi eséllyel NSFW egy-egy cikk a benne található képek alapján.",
-  "version": "0.2",
+  "version": "0.3",
   "content_scripts": [{
     "matches" : ["https://index.hu/", "http://index.hu/" ],
     "js" : [ "js/jquery.js", "js/magic.js" ]

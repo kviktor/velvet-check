@@ -36,7 +36,7 @@ function addScores(scores) {
   velvetLinks.each(function() {
     var url = decodeURIComponent(gup("url", $(this).prop("href")));
     if(url.split("/").length > MAX_SPLIT_NUM && $(this).html().indexOf("<img") < 0) {
-      if(scores[url] === null) {
+      if(!(url in scores) || scores[url] === null) {
         value = "-";
       } else {
         value = parseInt(scores[url] * 100) + "%";
