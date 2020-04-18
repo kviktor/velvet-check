@@ -13,10 +13,7 @@ class CalculateMissingArticleScoresTest(TestCase):
         p_link.return_value = ['im_1', 'im_2']
         p_image.return_value = {'im_1': 1, 'im_2': 2}
 
-        requested_urls = [1, 2, 3, 4, 5]
-        urls_in_db = {1: 1, 2:2, 5:5}.keys()
-
-        calculate_missing_article_scores(requested_urls, urls_in_db)
+        calculate_missing_article_scores([3, 4])
 
         self.assertTrue(Article.objects.filter(url='3').exists())
         self.assertTrue(Article.objects.filter(url='4').exists())

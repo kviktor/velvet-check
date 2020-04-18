@@ -23,11 +23,7 @@ INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 
 
 @dramatiq.actor
-def calculate_missing_article_scores(requested_urls, urls_in_db):
-    if len(requested_urls) == len(urls_in_db):
-        return
-
-    missing_urls = set(requested_urls) - set(urls_in_db)
+def calculate_missing_article_scores(missing_urls):
     for article_url in missing_urls:
         image_urls = get_image_urls_from_link(article_url)
         image_scores = generate_score_for_images(image_urls)
