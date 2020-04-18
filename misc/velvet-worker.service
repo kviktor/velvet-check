@@ -1,16 +1,17 @@
 [Unit]
-Description=Velvet check celery worker
+Description=Velvet check dramatiq worker
 After=network.target
 
 [Service]
-User=user
-Group=group
+User=kviktor
+Group=kviktor
 
 WorkingDirectory=/path/to/velvet-check/server
-Environment="VENV=/path/to/.virtualenvs/velvet"
 Environment="GLOG_minloglevel=2"
+Environment=PATH=/home/kviktor/.pyenv/versions/velvet-check/bin:$PATH
+Environment=PYTHONPATH=/path/to/caffe/python
 
-ExecStart=/bin/bash -c ". $VENV/bin/postactivate; . $VENV/bin/activate; exec celery -A tasks worker --loglevel=info -c 1"
+ExecStart=/usr/bin/env python manage.py rundramatiq --processes 1 --threads 1
 
 Restart=always
 

@@ -1,17 +1,20 @@
 [Unit]
-Description=Velvet check uwsgi web
+Description=Velvet check web worker
 After=network.target
 
 [Service]
-User=user
-Group=group
+User=kviktor
+Group=kviktor
 
 WorkingDirectory=/path/to/velvet-check/server
-Environment="VENV=/path/to/.virtualenvs/velvet"
+Environment=PATH=/home/kviktor/.pyenv/versions/velvet-check/bin:$PATH
+Environment=PYTHONPATH=/path/to/caffe/python
 
-ExecStart=/bin/bash -c ". $VENV/bin/postactivate; . $VENV/bin/activate; uwsgi -s /tmp/uwsgi-velvet.sock --manage-script-name --mount /=web:app --master --chmod-socket=666 --die-on-term"
+# this should use uwsgi but couldn't get it to work with py38
+ExecStart=/usr/bin/env python manage.py runserver '[::]:8000'
 
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
+
