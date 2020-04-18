@@ -4,6 +4,8 @@ django-dramatiq==0.9.1
 django-environ==0.4.5
 django-redis==4.11.0
 dramatiq[redis,watch]
+flake8
 lxml
+model-mommy
 redis==2.10.5
 requests==2.23.0

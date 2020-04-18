@@ -2,10 +2,16 @@ language: python
 python:
     - "3.8"
 
+services:
+  - redis-server
+
 install:
-    - pip install flake8
+    - pip install -r server/requirements.txt
     - npm -g install jshint
 
 script:
-    - flake8 server/ --max-line-length=85
     - jshint clients/chrome/ --exclude="clients/chrome/js/jquery.js"
+    - cd server
+    - cp .env.test .env
+    - flake8
+    - ./manage.py test

@@ -23,5 +23,5 @@ class ArticleModelTest(TestCase):
         )
 
     def test_score_without_images(self):
-        article = mommy.make(Article)
+        mommy.make(Article)
         self.assertEqual(0, Article.objects.get().score)

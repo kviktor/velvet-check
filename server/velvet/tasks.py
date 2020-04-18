@@ -3,10 +3,8 @@ import re
 from io import BytesIO
 
 import dramatiq
-import numpy as np
 import requests
 from bs4 import BeautifulSoup as bs
-from PIL import Image as PIL_Image
 
 from django.db import transaction
 from django.conf import settings
@@ -114,6 +112,8 @@ def resize_image(data, sz=(256, 256)):
     :returns bytearray:
         A byte array with the resized image
     """
+    from PIL import Image as PIL_Image
+
     im = PIL_Image.open(BytesIO(data))
     if im.mode != "RGB":
         im = im.convert('RGB')
@@ -171,6 +171,7 @@ def caffe_preprocess_and_compute(pimg, caffe_transformer=None, caffe_net=None,
 
 def classify_image(url):
     import caffe  # noqa
+    import numpy as np  # noqa
 
     response = requests.get(url)
     if not (200 <= response.status_code < 300):
