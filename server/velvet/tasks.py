@@ -1,17 +1,20 @@
 import logging
 import re
+from io import BytesIO
 
-import caffe
 import dramatiq
 import numpy as np
 import requests
 from bs4 import BeautifulSoup as bs
-from dramatiq.brokers.redis import RedisBroker
-from io import BytesIO
 from PIL import Image as PIL_Image
 
-from models import Article, Image
-from settings import PRETRAINED_MODEL_PATH, MODEL_DEF_PATH, BROKER_URL
+from django.db import transaction
+from django.conf import settings
+
+from .models import (
+    Article,
+    Image,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,39 +22,36 @@ TWITTER_RE = re.compile(".+>([a-zA-Z0-9./]+)<.+")
 INSTAGRAM_API = "https://api.instagram.com/oembed/?callback=&url=%s"
 
 
-redis_broker = RedisBroker(url=BROKER_URL)
-dramatiq.set_broker(redis_broker)
-
-
 @dramatiq.actor
-def generate_score_for_article(url):
-    if Article.by_url(url):
-        logger.warning("Article '%s' is already in db", url)
-    else:
-        Article.create(url)
+def calculate_missing_article_scores(requested_urls, urls_in_db):
+    if len(requested_urls) == len(urls_in_db):
+        return
 
-    image_urls = get_image_urls_from_link(url)
-    generate_score_for_images(url, image_urls)
+    missing_urls = set(requested_urls) - set(urls_in_db)
+    for article_url in missing_urls:
+        image_urls = get_image_urls_from_link(article_url)
+        image_scores = generate_score_for_images(image_urls)
 
+        with transaction.atomic():
+            article, _ = Article.objects.get_or_create(url=article_url)
 
-def get_article_score(url):
-    """ returns the score if it's in db
-        if it's not in db it returns None
-        and starts the job to calculate it asynchronously
-    """
-    article = Article.by_url(url)
-    if article:
-        return article.score
-    else:
-        generate_score_for_article.send(url)
+            for image_url, score in image_scores.items():
+                Image.objects.update_or_create(
+                    article=article,
+                    url=image_url,
+                    defaults={'score': score},
+                )
 
 
-def generate_score_for_images(article_url, image_urls):
+# not actual dramatiq tasks
+def generate_score_for_images(image_urls):
+    image_scores = {}
     for url in image_urls:
-        if not Image.by_url(url):
-            score = classify_image(url)
-            logger.info("Score for %s: %s", url, score)
-            Image.create(url, score, article_url)
+        score = classify_image(url)
+        logger.info("Score for %s: %s", url, score)
+        image_scores[url] = score
+
+    return image_scores
 
 
 def extract_instagram_urls(soup, link=None):
@@ -107,7 +107,6 @@ def get_image_urls_from_link(link):
 
 # from down here it's from/based on the open_nsfw repo modified for py3
 # https://github.com/yahoo/open_nsfw/blob/master/classify_nsfw.py
-
 def resize_image(data, sz=(256, 256)):
     """
     Resize image. Please use this resize logic for best results instead of the
@@ -145,6 +144,8 @@ def caffe_preprocess_and_compute(pimg, caffe_transformer=None, caffe_net=None,
     :return:
         Returns the requested outputs from the Caffe net.
     """
+    import caffe  # noqa
+
     if caffe_net is not None:
 
         # Grab the default output names if none were requested specifically.
@@ -173,10 +174,21 @@ def caffe_preprocess_and_compute(pimg, caffe_transformer=None, caffe_net=None,
 
 
 def classify_image(url):
-    image_data = requests.get(url).content
+    import caffe  # noqa
+
+    response = requests.get(url)
+    if not (200 <= response.status_code < 300):
+        logger.error('%s returned %d', url, response.status_code)
+        return None
+
+    image_data = response.content
 
     # Pre-load caffe model.
-    nsfw_net = caffe.Net(MODEL_DEF_PATH, PRETRAINED_MODEL_PATH, caffe.TEST)
+    nsfw_net = caffe.Net(
+        settings.MODEL_DEF_PATH,
+        settings.PRETRAINED_MODEL_PATH,
+        caffe.TEST,
+    )
 
     # Load transformer
     # Note that the parameters are hard-coded for best results
