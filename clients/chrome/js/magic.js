@@ -10,6 +10,7 @@ velvetLinks.each(function(e) {
   }
 });
 
+
 var key = hash(Array.from(urls).join()).toString();
 chrome.storage.local.get(key, function(result) {
   if(key in result) {
@@ -21,7 +22,7 @@ chrome.storage.local.get(key, function(result) {
         chrome.storage.local.clear();
 
         var scores = response.scores;
-        if(!hasNullValue(scores)) {
+        if(!hasNullValue(scores) && urls.size === Object.keys(scores).length) {
           var value = {}; value[key] = scores;
           chrome.storage.local.set(value);
         }
