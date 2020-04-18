@@ -1,4 +1,3 @@
-import json
 from unittest import mock
 from model_mommy import mommy
 
@@ -42,9 +41,8 @@ class GetScoresTest(TestCase):
         self.assertEqual({
             'a_1': 0.0,
             'a_2': 0.0,
-        },response.json())
+        }, response.json())
         p_cache.set.assert_called_once_with(mock.ANY, mock.ANY, timeout=600)
-
 
     @mock.patch('velvet.views.cache')
     def test_no_cache_hit_not_in_db(self, p_cache):
@@ -57,5 +55,5 @@ class GetScoresTest(TestCase):
 
         self.assertEqual({
             'a_1': 0.0,
-        },response.json())
+        }, response.json())
         p_cache.set.assert_called_once_with(mock.ANY, mock.ANY, timeout=15)
