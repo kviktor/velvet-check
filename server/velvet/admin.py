@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -12,11 +13,17 @@ class ArticleAdmin(admin.ModelAdmin):
     list_display = ('url', 'score', 'image_count', 'created_at', 'updated_at')
     readonly_fields = ('related_images', )
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.annotate(image_count=Count('images'))
+
     def image_count(self, obj):
         return obj.images.count()
+    image_count.admin_order_field = 'image_count'
 
     def score(self, obj):
-        return ('%0.4lf' % obj.score) if obj.score else None
+        return obj.score
+    score.admin_order_field = 'score'
 
     def related_images(self, obj):
         return mark_safe(
