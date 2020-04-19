@@ -45,7 +45,7 @@ class Image(UpdatedCreatedModel):
         related_name='images',
         on_delete=CASCADE,
     )
-    url = URLField(max_length=255, db_index=True)
+    url = URLField(max_length=511, db_index=True)
     score = FloatField(null=True, default=None)
 
     class Meta:
